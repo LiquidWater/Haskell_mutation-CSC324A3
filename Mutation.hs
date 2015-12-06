@@ -13,6 +13,7 @@ module Mutation (
 
 import AList (AList, lookupA, insertA, updateA)
 
+-- Part 1: Starter Code
 -- A type representing the possible values stored in memory.
 data Value = IntVal Integer |
              BoolVal Bool
@@ -23,7 +24,6 @@ type Memory = AList Integer Value
 
 -- A type representing a pointer to a location in memory.
 data Pointer a = P Integer
-
 
 -- Type class representing a type which can be stored in "Memory".
 class Mutable a where
@@ -38,3 +38,17 @@ class Mutable a where
     -- and the new memory with the new value.
     -- Raise an error if the input Integer is already storing a value.
     def :: Memory -> Integer -> a -> (Pointer a, Memory)
+
+
+-- Part 2: Chaining
+data StateOp a = StateOp (Memory -> (a, Memory))
+
+runOp :: StateOp a -> Memory -> (a, Memory)
+runOp (StateOp op) mem = op mem
+
+(>>>) :: StateOp a -> StateOp b -> StateOp b
+(>>>) = undefined
+
+(>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
+(>~>) = undefined
+
