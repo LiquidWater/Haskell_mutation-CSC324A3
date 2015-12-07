@@ -31,58 +31,64 @@ data Pointer a = P Integer
 -- Type class representing a type which can be stored in "Memory".
 class Mutable a where
     -- Look up a value in memory referred to by a pointer.
-    get :: Memory -> Pointer a -> a
+    get :: Pointer a -> StateOp a
 
     -- Change a value in memory referred to by a pointer.
     -- Return the new memory after the update.
-    set :: Memory -> Pointer a -> a -> Memory
+    set :: Pointer a -> a -> StateOp a
 
     -- Create a new memory location storing a value, returning a new pointer
     -- and the new memory with the new value.
     -- Raise an error if the input Integer is already storing a value.
-    def :: Memory -> Integer -> a -> (Pointer a, Memory)
+    def :: Integer -> a -> StateOp (Pointer a)
 
 instance Mutable Value where
-        get mem (P addr) = if containsA mem addr
-            then lookupA mem addr
-            else error "does not contain pointer"
-
-        set mem (P addr) val = updateA mem (addr, val)
-
-        def mem addr val = 
+        get (P addr) = StateOp (\mem -> 
             if containsA mem addr
-                then error "addr already defined"
-                else (ptr, modMem)
-            where modMem = insertA mem (addr, val)
-                  ptr = (P addr)
+                then (lookupA mem addr, mem)
+                else error "does not contain pointer! (get)")
+
+        set (P addr) val = StateOp (\mem -> 
+            if containsA mem addr
+                then (val, updateA mem (addr, val))
+                else error "does not contain pointer! (set)")
+
+        def addr val = StateOp (\mem ->
+            if containsA mem addr
+                then error "pointer addr already defined!"
+                else (P addr, insertA mem (addr, val)))
 
 instance Mutable Integer where
-        get mem (P addr) = if containsA mem addr
-            then let (IntVal result) = lookupA mem addr in result
-            else error "does not contain pointer"
-
-        set mem (P addr) val = updateA mem (addr, IntVal val)
-
-        def mem addr val = 
+        get (P addr) = StateOp (\mem -> 
             if containsA mem addr
-                then error "addr already defined"
-                else (ptr, modMem)
-            where modMem = insertA mem (addr, IntVal val)
-                  ptr = (P addr)
+                then let (IntVal result) = lookupA mem addr in (result, mem)
+                else error "does not contain pointer! (get)")
+
+        set (P addr) val = StateOp (\mem -> 
+            if containsA mem addr
+                then (val, updateA mem (addr, IntVal val))
+                else error "does not contain pointer! (set)")
+
+        def addr val = StateOp (\mem ->
+            if containsA mem addr
+                then error "pointer addr already defined!"
+                else (P addr, insertA mem (addr, IntVal val)))
 
 instance Mutable Bool where
-        get mem (P addr) = if containsA mem addr
-            then let (BoolVal result) = lookupA mem addr in result
-            else error "does not contain pointer"
-
-        set mem (P addr) val = updateA mem (addr, BoolVal val)
-
-        def mem addr val = 
+        get (P addr) = StateOp (\mem -> 
             if containsA mem addr
-                then error "addr already defined"
-                else (ptr, modMem)
-            where modMem = insertA mem (addr, BoolVal val)
-                  ptr = (P addr)
+                then let (BoolVal result) = lookupA mem addr in (result, mem)
+                else error "does not contain pointer! (get)")
+
+        set (P addr) val = StateOp (\mem -> 
+            if containsA mem addr
+                then (val, updateA mem (addr, BoolVal val))
+                else error "does not contain pointer! (set)")
+
+        def addr val = StateOp (\mem ->
+            if containsA mem addr
+                then error "pointer addr already defined!"
+                else (P addr, insertA mem (addr, BoolVal val)))
 
 -- Part 2: Chaining
 data StateOp a = StateOp (Memory -> (a, Memory))
