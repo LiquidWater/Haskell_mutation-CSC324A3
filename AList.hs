@@ -7,7 +7,8 @@ module AList (
     AList,
     lookupA,
     insertA,
-    updateA
+    updateA,
+    containsA
     )
     where
 
@@ -37,3 +38,9 @@ updateA alist (key, val) =
     let templist = filter (\(a, b) -> a == key) alist
         otherlist = filter (\(a, b) -> a /= key) alist in
     if null templist then alist else otherlist ++ [(key, val)]
+
+containsA :: Eq a => AList a b -> a -> Bool
+containsA alist key = any ((==) key) (getKeys alist)
+
+getKeys :: AList a b -> [a]
+getKeys alist = map (\ (key, val) -> key) alist
