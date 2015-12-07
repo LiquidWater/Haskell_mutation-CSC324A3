@@ -8,8 +8,9 @@ which you will use as the data structure for storing "mutable" data.
 module Mutation (
     Mutable, get, set, def,
     Memory, Pointer(..),
-    runOp, (>>>), (>~>),
-    Value(..), StateOp
+    runOp, (>>>), (>~>), returnVal,
+    Value(..), StateOp(..),
+    alloc, free
     )
     where
 
@@ -95,3 +96,26 @@ runOp op mem = undefined
 (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
 (>~>) = undefined
 
+{-
+A function that takes a value, then creates a new StateOp which doesn't
+interact with the memory at all, and instead just returns the value as
+the first element in the tuple.
+-}
+returnVal :: a -> StateOp a
+returnVal a = StateOp (\x -> (a, []))
+
+-- Part 4
+{-
+Similar to def, except that the function automatically generates a fresh
+(i.e., unused) number to bind in the value in memory, rather than accepting a
+number as a parameter.
+-}
+alloc :: Mutable a => a -> StateOp (Pointer a)
+alloc val = undefined
+
+{-
+Takes a pointer, and removes the corresponding name-value binding from the
+memory. You should add to AList.hs to do this.
+-}
+free :: Mutable a => Pointer a -> StateOp ()
+free ptr = undefined
