@@ -42,14 +42,46 @@ class Mutable a where
     def :: Memory -> Integer -> a -> (Pointer a, Memory)
 
 instance Mutable Value where
-        get mem (P addr) = lookupA mem addr
+        get mem (P addr) = if containsA mem addr
+            then lookupA mem addr
+            else error "does not contain pointer"
+
         set mem (P addr) val = updateA mem (addr, val)
+
         def mem addr val = 
             if containsA mem addr
                 then error "addr already defined"
                 else (ptr, modMem)
             where modMem = insertA mem (addr, val)
-                  ptr = (P addr) 
+                  ptr = (P addr)
+
+instance Mutable Integer where
+        get mem (P addr) = if containsA mem addr
+            then let (IntVal result) = lookupA mem addr in result
+            else error "does not contain pointer"
+
+        set mem (P addr) val = updateA mem (addr, IntVal val)
+
+        def mem addr val = 
+            if containsA mem addr
+                then error "addr already defined"
+                else (ptr, modMem)
+            where modMem = insertA mem (addr, IntVal val)
+                  ptr = (P addr)
+
+instance Mutable Bool where
+        get mem (P addr) = if containsA mem addr
+            then let (BoolVal result) = lookupA mem addr in result
+            else error "does not contain pointer"
+
+        set mem (P addr) val = updateA mem (addr, BoolVal val)
+
+        def mem addr val = 
+            if containsA mem addr
+                then error "addr already defined"
+                else (ptr, modMem)
+            where modMem = insertA mem (addr, BoolVal val)
+                  ptr = (P addr)
 
 -- Part 2: Chaining
 data StateOp a = StateOp (Memory -> (a, Memory))
