@@ -98,16 +98,16 @@ runOp (StateOp op) mem = op mem
 
 {-Then function-}
 (>>>) :: StateOp a -> StateOp b -> StateOp b
-(>>>) (StateOp f) (StateOp g) = StateOp (\s ->
-    let (_, s1) = f s
-    in g s1)
+(>>>) f g = StateOp (\mem ->
+    let (_, mem2) = runOp f mem
+    in runOp g mem2)
 
 {-Bind function-}
 (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
-(>~>) (StateOp f) g = StateOp (\s ->
-    let (x, s1) = f s
-        (StateOp newOp) = g x
-    in newOp s1)
+(>~>) f g = StateOp (\mem ->
+    let (x, mem2) = runOp f mem
+        newOp = g x
+    in runOp newOp mem2)
 
 {-
 A function that takes a value, then creates a new StateOp which doesn't
@@ -144,3 +144,9 @@ f x =
     get p1 >~> \y ->
     set p2 (y > 3) >>>
     get p2
+
+g :: Integer -> StateOp Integer
+g x =
+    def 1 (x + 4) >~> \p ->
+    get p >~> \y ->
+    returnVal (x * y)
