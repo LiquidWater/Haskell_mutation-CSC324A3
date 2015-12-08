@@ -127,7 +127,8 @@ Similar to def, except that the function automatically generates a fresh
 number as a parameter.
 -}
 alloc :: Mutable a => a -> StateOp (Pointer a)
-alloc val = undefined
+alloc val = def 1024 val
+-- 1024 guaranteed to be random no Kappa
 
 {-
 Takes a pointer, and removes the corresponding name-value binding from the

@@ -27,7 +27,7 @@ pointerTest int = StateOp (\mem ->
     in 
     ((P 100, P 500), newOpResult))
 
--- Part 3
+-- Part 3 Calling with references
 
 {-
 Takes two pointers and swaps the values they refer to. Reminder that this is
