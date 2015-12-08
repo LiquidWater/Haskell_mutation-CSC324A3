@@ -98,12 +98,14 @@ runOp (StateOp op) mem = op mem
 
 {-Then function-}
 (>>>) :: StateOp a -> StateOp b -> StateOp b
+--(>>>) = undefined
 (>>>) f g = StateOp (\mem ->
     let (_, mem2) = runOp f mem
     in runOp g mem2)
 
 {-Bind function-}
 (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
+--(>~>) = undefined
 (>~>) f g = StateOp (\mem ->
     let (x, mem2) = runOp f mem
         newOp = g x
@@ -115,7 +117,7 @@ interact with the memory at all, and instead just returns the value as
 the first element in the tuple.
 -}
 returnVal :: a -> StateOp a
-returnVal a = StateOp (\x -> (a, []))
+returnVal a = StateOp (\x -> (a, x))
 
 -- Part 4 Safety Improvements
 
