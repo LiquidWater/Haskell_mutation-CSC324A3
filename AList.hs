@@ -39,8 +39,14 @@ updateA alist (key, val) =
         otherlist = filter (\(a, b) -> a /= key) alist in
     if null templist then alist else otherlist ++ [(key, val)]
 
+{-
+Checks whether or not a key exists in the AList
+-}
 containsA :: Eq a => AList a b -> a -> Bool
 containsA alist key = any ((==) key) (getKeys alist)
 
+{-
+Internal helper function to get all the keys in the AList
+-}
 getKeys :: AList a b -> [a]
 getKeys alist = map (\ (key, val) -> key) alist

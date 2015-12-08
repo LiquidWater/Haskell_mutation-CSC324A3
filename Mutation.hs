@@ -94,13 +94,20 @@ instance Mutable Bool where
 data StateOp a = StateOp (Memory -> (a, Memory))
 
 runOp :: StateOp a -> Memory -> (a, Memory)
-runOp op mem = undefined
+runOp (StateOp op) mem = op mem
 
+{-Then function-}
 (>>>) :: StateOp a -> StateOp b -> StateOp b
-(>>>) = undefined
+(>>>) (StateOp f) (StateOp g) = StateOp (\s ->
+    let (_, s1) = f s
+    in g s1)
 
+{-Bind function-}
 (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
-(>~>) = undefined
+(>~>) (StateOp f) g = StateOp (\s ->
+    let (x, s1) = f s
+        (StateOp newOp) = g x
+    in newOp s1)
 
 {-
 A function that takes a value, then creates a new StateOp which doesn't
@@ -110,7 +117,8 @@ the first element in the tuple.
 returnVal :: a -> StateOp a
 returnVal a = StateOp (\x -> (a, []))
 
--- Part 4
+-- Part 4 Safety Improvements
+
 {-
 Similar to def, except that the function automatically generates a fresh
 (i.e., unused) number to bind in the value in memory, rather than accepting a
@@ -125,3 +133,14 @@ memory. You should add to AList.hs to do this.
 -}
 free :: Mutable a => Pointer a -> StateOp ()
 free ptr = undefined
+
+{-David's Test Code-}
+
+f :: Integer -> StateOp Bool
+f x =
+    def 1 4 >~> \p1 ->
+    def 2 True >~> \p2 ->
+    set p1 (x + 5) >>>
+    get p1 >~> \y ->
+    set p2 (y > 3) >>>
+    get p2
