@@ -19,11 +19,13 @@ import Mutation (
 --   Return the pointer to each stored value, and the new memory.
 --   You may assume these locations are not already used by the memory.
 pointerTest :: Integer -> StateOp (Pointer Integer, Pointer Bool)
-pointerTest int = let
-    mem_100 = IntVal (int + 3)
-    mem_500 = BoolVal (int > 0)
-    newOp = (def 100 mem_100) >>> (def 500 mem_500) in
-    StateOp (\mem -> ((P 100, P 500), runOp newOp mem))
+pointerTest int = StateOp (\mem ->
+    let 
+        mem_100 = IntVal (int + 3)
+        mem_500 = BoolVal (int > 0)
+        (_, newOpResult) = runOp ((def 100 mem_100) >>> (def 500 mem_500)) mem
+    in 
+    ((P 100, P 500), newOpResult))
 
 -- Part 3
 
