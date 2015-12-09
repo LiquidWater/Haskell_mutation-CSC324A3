@@ -5,7 +5,7 @@ which you will use as the data structure for storing "mutable" data.
 -}
 
 -- **YOU MUST ADD ALL FUNCTIONS AND TYPES TO THIS LIST AS YOU CREATE THEM!!**
-module Mutation (
+module CompoundMutation (
     Mutable, get, set, def,
     Memory, Pointer(..), Value(..),  -- Part 0 and Part 1
     runOp, (>>>), (>~>), returnVal,  -- Part 2
@@ -106,10 +106,10 @@ instance Mutable Person where       --Part 5 person functions
             let
                 Person age iss = person
                 (_ , endm) =
-                    runOp ((set(P aaddr)age) >>> (set(P iaddr)iss)) mem
+                    runOp ((set (P aaddr) age) >>> (set (P iaddr) iss)) mem
                 person = Person age iss
             in
-                (person, mem))
+                (person, endm))
         {-alloc each slot and place age and is student in mem, return compoint
         pointer-}
         def addr person = StateOp (\mem ->
@@ -199,16 +199,16 @@ g x =
 data Person = Person Integer Bool deriving Show
 
 --function to retrieve an attr pointer from a person
-(@@) :: Pointer a -> (Pointer  a -> Pointer b ) ->Pointer b
-(@@) point fun = fun point
+(@@) :: (Mutable a, Mutable b) => Pointer a -> (Pointer a -> Pointer b) -> Pointer b
+(@@) point func = func point
 
 --simple pattern matching to get the age pointer
-age :: Pointer a -> Pointer b
-age (PP x _ )= P x
+age :: (Mutable a, Mutable b) => Pointer a -> Pointer b
+age (PP x _) = P x
 
 --simple pattern matching for the student pointer
-isStudent:: Pointer a -> Pointer b
-isStudent (PP _ x)= P x
+isStudent:: (Mutable a, Mutable b) => Pointer a -> Pointer b
+isStudent (PP _ x) = P x
 
 personTest :: Person -> Integer -> StateOp (Integer, Bool, Person)
 personTest person x =
