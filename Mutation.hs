@@ -7,10 +7,9 @@ which you will use as the data structure for storing "mutable" data.
 -- **YOU MUST ADD ALL FUNCTIONS AND TYPES TO THIS LIST AS YOU CREATE THEM!!**
 module Mutation (
     Mutable, get, set, def,
-    Memory, Pointer(..),
-    runOp, (>>>), (>~>), returnVal,
-    Value(..), StateOp(..),
-    alloc, free
+    Memory, Pointer(..), Value(..),  -- Part 0 and Part 1
+    runOp, (>>>), (>~>), returnVal,  -- Part 2
+    StateOp(..), alloc, free         -- Part 4
     )
     where
 
@@ -41,6 +40,8 @@ class Mutable a where
     -- and the new memory with the new value.
     -- Raise an error if the input Integer is already storing a value.
     def :: Integer -> a -> StateOp (Pointer a)
+
+{-Creating instances of the typeclasses-}
 
 instance Mutable Value where
         get (P addr) = StateOp (\mem -> 
@@ -91,40 +92,44 @@ instance Mutable Bool where
                 else (P addr, insertA mem (addr, BoolVal val)))
 
 -- Part 2: Chaining
+{-Functions and data provided by David-}
 data StateOp a = StateOp (Memory -> (a, Memory))
 
 runOp :: StateOp a -> Memory -> (a, Memory)
 runOp (StateOp op) mem = op mem
 
-{-Then function-}
+{-
+  Then function
+  Based off of StackOp's then function
+-}
 (>>>) :: StateOp a -> StateOp b -> StateOp b
---(>>>) = undefined
 (>>>) f g = StateOp (\mem ->
     let (_, mem2) = runOp f mem
     in runOp g mem2)
 
-{-Bind function-}
+{-
+  Bind function
+  Based off of StackOp's bind function
+-}
 (>~>) :: StateOp a -> (a -> StateOp b) -> StateOp b
---(>~>) = undefined
 (>~>) f g = StateOp (\mem ->
     let (x, mem2) = runOp f mem
         newOp = g x
     in runOp newOp mem2)
 
 {-
-A function that takes a value, then creates a new StateOp which doesn't
-interact with the memory at all, and instead just returns the value as
-the first element in the tuple.
+  A function that takes a value, then creates a new StateOp which doesn't
+  interact with the memory at all, and instead just returns the value as
+  the first element in the tuple.
 -}
 returnVal :: a -> StateOp a
 returnVal a = StateOp (\x -> (a, x))
 
 -- Part 4 Safety Improvements
-
 {-
-Similar to def, except that the function automatically generates a fresh
-(i.e., unused) number to bind in the value in memory, rather than accepting a
-number as a parameter.
+  Similar to def, except that the function automatically generates a fresh
+  (i.e., unused) number to bind in the value in memory, rather than accepting a
+  number as a parameter.
 -}
 alloc :: Mutable a => a -> StateOp (Pointer a)
 alloc val = StateOp(\mem ->
@@ -132,12 +137,11 @@ alloc val = StateOp(\mem ->
        i = (take 1 (filter (\x -> not (containsA mem x)) [1..])) !! 0
        (_, endm) = runOp(def i val) mem
     in
-    (P i, endm))
-
+        (P i, endm))
 
 {-
-Takes a pointer, and removes the corresponding name-value binding from the
-memory. You should add to AList.hs to do this.
+  Takes a pointer, and removes the corresponding name-value binding from the
+  memory. You should add to AList.hs to do this.
 -}
 free :: Mutable a => Pointer a -> StateOp ()
 free (P ptr) = StateOp (\mem -> ((), removeA mem ptr))
