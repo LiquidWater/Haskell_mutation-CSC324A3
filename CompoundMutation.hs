@@ -107,7 +107,6 @@ instance Mutable Person where       --Part 5 person functions
                 Person age iss = person
                 (_ , endm) =
                     runOp ((set (P aaddr) age) >>> (set (P iaddr) iss)) mem
-                person = Person age iss
             in
                 (person, endm))
         {-alloc each slot and place age and is student in mem, return compoint
