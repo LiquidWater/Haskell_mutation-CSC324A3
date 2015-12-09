@@ -10,7 +10,7 @@ module MutationUser (
 
 import Mutation (
     get, set, def, Mutable, Memory, Pointer(..), Value(..), StateOp(..),
-    (>>>), (>~>), runOp, alloc, free
+    (>>>), (>~>), runOp, alloc, free, returnVal
     )
 
 -- | Takes a number <n> and memory, and stores two new values in memory:
@@ -50,7 +50,7 @@ swap (P pointer1) (P pointer2) = StateOp (\mem ->
         firstSet = firstOp >>> secOp
         secSet = thirdOp >>> fourthOp
     in
-        runOp (firstSet >>> secSet) mem
+        runOp (firstSet >>> secSet >>> returnVal ()) mem
     )
 
 {-
