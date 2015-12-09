@@ -39,10 +39,18 @@ swap (P pointer1) (P pointer2) = StateOp (\mem ->
     let
         p1 = (P pointer1)
         p2 = (P pointer2)
-        (value1, _) = runOp (get p1) mem
-        (value2, _) = runOp (get p2) mem
+        (value1, _) = runOp (get (p1 :: Pointer Value)) mem
+        (value2, _) = runOp (get (p2 :: Pointer Value)) mem
+
+        firstOp = free (p1 :: Pointer Value)
+        secOp = free (p1 :: Pointer Value)
+        thirdOp = def pointer1 value2
+        fourthOp = def pointer2 value1
+
+        firstSet = firstOp >>> secOp
+        secSet = thirdOp >>> fourthOp
     in
-        runOp (free p1 >>> free p1) mem
+        runOp (firstSet >>> secSet) mem
     )
 
 {-
