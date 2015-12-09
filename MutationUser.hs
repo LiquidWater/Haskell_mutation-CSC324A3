@@ -64,17 +64,13 @@ swap (P pointer1) (P pointer2) = StateOp (\mem ->
   has length less than 2.
 -}
 swapCycle :: Mutable a => [Pointer a] -> StateOp ()
+swapCycle [] = StateOp (\mem-> ((), mem))
+
 swapCycle pointer_list = StateOp (\mem ->
-    let
-        if((length pointer_list) < 2) -- if not large enough do nothing and return
-            then
-                returnVal = ((), mem)
-                else
---swap current position and next so base case has no work, v2 moved up with each recurse
-                x:xs = pointer_list
-                y = xs !! 0
-                _ = runOp(swap x y) mem
-                returnVal = runOp(swapCycle((y:xs))) mem
-    in
-        returnVal)
+    if (length pointer_list) < 2
+        then ((), mem)
+        else
+            let (x1:x2:xn) = pointer_list in
+                runOp ((swap x1 x2) >>> (swapCycle (x2:xn))) mem
+    )
         
