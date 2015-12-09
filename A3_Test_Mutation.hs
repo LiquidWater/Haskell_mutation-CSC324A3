@@ -92,7 +92,7 @@ main = do
     -- (Format's a little ugly, though.)
     --runTestTT mutableTests
     --runTestTT chainTests
-    --runTestTT safetyTests
+    runTestTT safetyTests
     putStrLn "Tests Done!"
 
 

@@ -60,4 +60,17 @@ pn's value to v1. This function should not change anything if its argument
 has length less than 2.
 -}
 swapCycle :: Mutable a => [Pointer a] -> StateOp ()
-swapCycle pointer_list = undefined
+swapCycle pointer_list =  StateOp (\mem ->
+    let
+        if (length pointer_list < 2) -- if not large enough do nothing and return
+            then
+                returnVal = ((), mem)
+
+            else 
+                x:xs = pointer_list
+                y = xs !! 0
+                _ = (swap x y) mem --swap current position and next so base case has no work, v2 moved up with each recurse
+                returnVal = swapCycle(y:xs) mem
+    in
+    returnVal)
+
