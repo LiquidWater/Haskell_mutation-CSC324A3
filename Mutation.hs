@@ -14,7 +14,7 @@ module Mutation (
     )
     where
 
-import AList (AList, lookupA, insertA, updateA, containsA)
+import AList (AList, lookupA, insertA, updateA, containsA, removeA)
 
 -- Part 1: Starter Code
 -- A type representing the possible values stored in memory.
@@ -140,7 +140,7 @@ Takes a pointer, and removes the corresponding name-value binding from the
 memory. You should add to AList.hs to do this.
 -}
 free :: Mutable a => Pointer a -> StateOp ()
-free ptr = undefined
+free (P ptr) = StateOp (\mem -> ((), removeA mem ptr))
 
 {-David's Test Code-}
 
