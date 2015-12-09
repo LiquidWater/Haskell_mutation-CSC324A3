@@ -135,7 +135,7 @@ Takes a pointer, and removes the corresponding name-value binding from the
 memory. You should add to AList.hs to do this.
 -}
 free :: Mutable a => Pointer a -> StateOp ()
-free ptr = undefined
+free (P ptr) = StateOp (\mem -> ((), removeA mem ptr))
 
 {-David's Test Code-}
 
