@@ -92,7 +92,12 @@ instance Mutable Bool where
                 then error "pointer addr already defined!"
                 else (P addr, insertA mem (addr, BoolVal val)))
 
-instance Mutable Person where       --Part 5 person functions
+{-
+    Part 5 Mutable Person instance
+    Utilizes the get set and def functions finished in Mutation.hs to define
+    the Mutable Person instance.
+-}
+instance Mutable Person where
         --get the 2 parts separately then combine to ship
         get (PP aaddr iaddr) = StateOp (\mem ->
             let
