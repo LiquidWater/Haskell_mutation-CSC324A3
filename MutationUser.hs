@@ -10,7 +10,7 @@ module MutationUser (
 
 import Mutation (
     get, set, def, Mutable, Memory, Pointer(..), Value(..), StateOp(..),
-    (>>>), (>~>), runOp
+    (>>>), (>~>), runOp, alloc, free
     )
 
 -- | Takes a number <n> and memory, and stores two new values in memory:
@@ -25,7 +25,7 @@ pointerTest int = StateOp (\mem ->
         mem_500 = BoolVal (int > 0)
         (_, newOpResult) = runOp ((def 100 mem_100) >>> (def 500 mem_500)) mem
     in 
-    ((P 100, P 500), newOpResult))
+        ((P 100, P 500), newOpResult))
 
 -- Part 3 Calling with references
 
@@ -35,7 +35,15 @@ not something we knew how to do otherwise in either Racket (without mutation)
 or Haskell.
 -}
 swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
-swap pointer1 pointer2 = undefined
+swap (P pointer1) (P pointer2) = StateOp (\mem ->
+    let
+        p1 = (P pointer1)
+        p2 = (P pointer2)
+        (value1, _) = runOp (get p1) mem
+        (value2, _) = runOp (get p2) mem
+    in
+        runOp (free p1 >>> free p1) mem
+    )
 
 {-
 Takes a list of pointers p1, ..., pn, with corresponding values
