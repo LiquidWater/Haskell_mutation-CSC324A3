@@ -134,8 +134,8 @@ returnVal a = StateOp (\x -> (a, x))
 alloc :: Mutable a => a -> StateOp (Pointer a)
 alloc val = StateOp(\mem ->
     let 
-       i = (take 1 (filter (\x -> not (containsA mem x)) [1..])) !! 0 --take the first element of nats that isnt contained
-       (_, endm) = runOp(def i val) mem 
+       i = (take 1 (filter (\x -> not (containsA mem x)) [1..])) !! 0
+       (_, endm) = runOp(def i val) mem
     in
         (P i, endm))
 
