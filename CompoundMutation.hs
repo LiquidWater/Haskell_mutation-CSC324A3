@@ -25,7 +25,8 @@ data Value = IntVal Integer |
 type Memory = AList Integer Value
 
 -- A type representing a pointer to a location in memory.
-data Pointer a = P Integer
+data Pointer a = P Integer |
+                 PP Integer Integer  --person pointer has 2 addr. one per attr
 
 -- Type class representing a type which can be stored in "Memory".
 class Mutable a where
@@ -90,6 +91,32 @@ instance Mutable Bool where
             if containsA mem addr
                 then error "pointer addr already defined!"
                 else (P addr, insertA mem (addr, BoolVal val)))
+
+instance Mutable Person where       --Part 5 person functions
+        get (PP aaddr iaddr) = StateOp (\mem -> --get the 2 parts separately then combine to ship
+            let
+                (age, _) = runOp (get (P aaddr)) mem 
+                (iss, _) = runOp (get (P iaddr)) mem
+                person = Person age iss
+            in
+            (person, mem))
+
+        set (PP aaddr iaddr) person = StateOp (\mem -> --set each part then build person to return
+            let
+                Person age iss = person
+                (_ , endm) = runOp ((set (P aaddr) age )>>>(set (P iaddr) iss)) mem
+                person = Person age iss
+            in
+            (person, mem))
+
+        def addr person = StateOp (\mem -> --alloc each slot and place age and is student in mem, return compoint pointer
+            let
+                Person age iss = person
+                (P p1, mem1) = runOp (alloc age)mem
+                (P p2, mem2) = runOp (alloc iss)mem1
+                per2 = PP p1 p2
+            in
+            (per2, mem2))
 
 -- Part 2: Chaining
 {-Functions and data provided by David-}
@@ -162,3 +189,37 @@ g x =
     def 1 (x + 4) >~> \p ->
     get p >~> \y ->
     returnVal (x * y)
+
+--Part 5
+-- A type representing a person with two attributes:
+-- age and whether they are a student or not.
+data Person = Person Integer Bool deriving Show
+
+
+--function to retrieve an attr pointer from a person
+(@@) :: Pointer a -> (Pointer  a -> Pointer b ) ->Pointer b
+(@@) point fun = fun point
+
+--simple pattern matching to get the age pointer
+age :: Pointer a -> Pointer b
+age (PP x _ )= P x
+
+--simple pattern matching for the student pointer
+isStudent:: Pointer a -> Pointer b
+isStudent (PP _ x)= P x
+
+
+
+
+personTest :: Person -> Integer -> StateOp (Integer, Bool, Person)
+personTest person x =
+    -- not using alloc, but we could
+    def 1 person >~> \personPointer ->
+    get (personPointer @@ age) >~> \oldAge ->
+    set (personPointer @@ age) x >>>
+    get (personPointer @@ isStudent) >~> \stu ->
+    get (personPointer @@ age) >~> \newAge ->
+    set personPointer (Person (2 * newAge) (not stu)) >>>
+    get personPointer >~> \newPerson ->
+    get (personPointer @@ isStudent) >~> \newStu ->
+    returnVal (oldAge, newStu, newPerson)
