@@ -93,30 +93,33 @@ instance Mutable Bool where
                 else (P addr, insertA mem (addr, BoolVal val)))
 
 instance Mutable Person where       --Part 5 person functions
-        get (PP aaddr iaddr) = StateOp (\mem -> --get the 2 parts separately then combine to ship
+        --get the 2 parts separately then combine to ship
+        get (PP aaddr iaddr) = StateOp (\mem ->
             let
                 (age, _) = runOp (get (P aaddr)) mem 
                 (iss, _) = runOp (get (P iaddr)) mem
                 person = Person age iss
             in
-            (person, mem))
-
-        set (PP aaddr iaddr) person = StateOp (\mem -> --set each part then build person to return
+                (person, mem))
+        --set each part then build person to return
+        set (PP aaddr iaddr) person = StateOp (\mem ->
             let
                 Person age iss = person
-                (_ , endm) = runOp ((set (P aaddr) age )>>>(set (P iaddr) iss)) mem
+                (_ , endm) =
+                    runOp ((set(P aaddr)age) >>> (set(P iaddr)iss)) mem
                 person = Person age iss
             in
-            (person, mem))
-
-        def addr person = StateOp (\mem -> --alloc each slot and place age and is student in mem, return compoint pointer
+                (person, mem))
+        {-alloc each slot and place age and is student in mem, return compoint
+        pointer-}
+        def addr person = StateOp (\mem ->
             let
                 Person age iss = person
                 (P p1, mem1) = runOp (alloc age)mem
                 (P p2, mem2) = runOp (alloc iss)mem1
                 per2 = PP p1 p2
             in
-            (per2, mem2))
+                (per2, mem2))
 
 -- Part 2: Chaining
 {-Functions and data provided by David-}
@@ -195,7 +198,6 @@ g x =
 -- age and whether they are a student or not.
 data Person = Person Integer Bool deriving Show
 
-
 --function to retrieve an attr pointer from a person
 (@@) :: Pointer a -> (Pointer  a -> Pointer b ) ->Pointer b
 (@@) point fun = fun point
@@ -207,9 +209,6 @@ age (PP x _ )= P x
 --simple pattern matching for the student pointer
 isStudent:: Pointer a -> Pointer b
 isStudent (PP _ x)= P x
-
-
-
 
 personTest :: Person -> Integer -> StateOp (Integer, Bool, Person)
 personTest person x =
