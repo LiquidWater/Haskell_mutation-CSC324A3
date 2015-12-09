@@ -35,7 +35,15 @@ not something we knew how to do otherwise in either Racket (without mutation)
 or Haskell.
 -}
 swap :: Mutable a => Pointer a -> Pointer a -> StateOp ()
-swap pointer1 pointer2 = undefined
+swap pointer1 pointer2 =StateOp(\mem ->
+    let 
+        m = mem
+        (get1, _)= runOp(get pointer1) mem
+        (get2, _)= runOp(get pointer2) mem
+        (_, newOpResult) = runOp((set pointer1 get2)>>>(set pointer2 get2)) m
+    in
+    ((), newOpResult))
+
 
 {-
 Takes a list of pointers p1, ..., pn, with corresponding values
