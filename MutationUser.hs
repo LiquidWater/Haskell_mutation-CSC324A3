@@ -43,7 +43,7 @@ swap (P pointer1) (P pointer2) = StateOp (\mem ->
         (value2, _) = runOp (get (p2 :: Pointer Value)) mem
 
         firstOp = free (p1 :: Pointer Value)
-        secOp = free (p1 :: Pointer Value)
+        secOp = free (p2 :: Pointer Value)
         thirdOp = def pointer1 value2
         fourthOp = def pointer2 value1
 
